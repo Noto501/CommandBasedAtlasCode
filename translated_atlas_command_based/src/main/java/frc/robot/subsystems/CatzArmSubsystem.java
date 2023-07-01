@@ -118,40 +118,36 @@ public class CatzArmSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() 
-  {
+  public void periodic() {
     // This method will be called once per scheduler run
-    if(highExtendProcess == true)
-    {
+    if(highExtendProcess == true) {
 
     }
 
     currentPosition = armMtr.getSelectedSensorPosition();
     positionError = currentPosition - targetPosition;
-    if  ((Math.abs(positionError) <= ARM_POS_ERROR_THRESHOLD) && targetPosition != NO_TARGET_POSITION)
-    {
+    if  ((Math.abs(positionError) <= ARM_POS_ERROR_THRESHOLD) && targetPosition != NO_TARGET_POSITION) {
+
         targetPosition = NO_TARGET_POSITION;
         numConsectSamples++;
-            if(numConsectSamples >= 10)
-            {   
+            if(numConsectSamples >= 10) {   
                 armInPosition = true;
             }
     }
-    else
-    {
+    else {
         numConsectSamples = 0;
     }
   }
 
   
-  public void checkLimitSwitches()
-    {
-        if(armMtr.getSensorCollection().isRevLimitSwitchClosed() == SWITCH_CLOSED)
+  public void checkLimitSwitches() {
+
+        if(armMtr.getSensorCollection().isRevLimitSwitchClosed() == SWITCH_CLOSED) 
         {
             armMtr.setSelectedSensorPosition(POS_ENC_CNTS_RETRACT);
             extendSwitchState = true;
         }
-        else
+        else 
         {
             extendSwitchState = false;
         }
