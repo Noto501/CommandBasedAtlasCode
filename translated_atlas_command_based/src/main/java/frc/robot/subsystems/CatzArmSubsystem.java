@@ -120,13 +120,15 @@ public class CatzArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if(highExtendProcess == true) {
+    if(highExtendProcess == true) 
+    {
 
     }
 
     currentPosition = armMtr.getSelectedSensorPosition();
     positionError = currentPosition - targetPosition;
-    if  ((Math.abs(positionError) <= ARM_POS_ERROR_THRESHOLD) && targetPosition != NO_TARGET_POSITION) {
+    if  ((Math.abs(positionError) <= ARM_POS_ERROR_THRESHOLD) && targetPosition != NO_TARGET_POSITION) 
+    {
 
         targetPosition = NO_TARGET_POSITION;
         numConsectSamples++;
@@ -134,7 +136,8 @@ public class CatzArmSubsystem extends SubsystemBase {
                 armInPosition = true;
             }
     }
-    else {
+    else 
+    {
         numConsectSamples = 0;
     }
   }
