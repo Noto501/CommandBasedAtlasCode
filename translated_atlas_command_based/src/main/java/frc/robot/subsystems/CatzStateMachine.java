@@ -14,17 +14,16 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CatzStateMachineSubsystem extends SubsystemBase {
+public class CatzStateMachine extends SubsystemBase{
 
   private int selectedGamePiece;
 
-  public CatzStateMachineSubsystem() 
+  public CatzStateMachine() 
   {
     
   }
 
-  @Override
-  public void periodic() 
+  public void periodic()
   {
 
   }

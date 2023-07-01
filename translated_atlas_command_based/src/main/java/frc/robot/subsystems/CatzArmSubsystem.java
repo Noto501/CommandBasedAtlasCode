@@ -64,7 +64,6 @@ public class CatzArmSubsystem extends SubsystemBase {
   private final double POS_ENC_CNTS_RETRACT  = 0.0+154;//POS_ENC_INCH_RETRACT * CNTS_PER_INCH_CONVERSION_FACTOR;
   private final double POS_ENC_CNTS_EXTEND  = 44000.0+154;//POS_ENC_INCH_EXTEND * CNTS_PER_INCH_CONVERSION_FACTOR;
   private final double POS_ENC_CNTS_PICKUP = 22000.0+154;//POS_ENC_INCH_PICKUP * CNTS_PER_INCH_CONVERSION_FACTOR;
-  private final double POS_ENC_CNTS_HIGH_EXTEND_THRESHOLD_ELEVATOR = 73000.0;
 
 
   private boolean extendSwitchState = false;

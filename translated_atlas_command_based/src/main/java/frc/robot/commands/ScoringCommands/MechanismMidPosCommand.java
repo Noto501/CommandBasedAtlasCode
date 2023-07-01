@@ -8,17 +8,20 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.CatzArmSubsystem;
 import frc.robot.subsystems.CatzElevatorSubsystem;
 import frc.robot.subsystems.CatzIntakeSubsytem;
-import frc.robot.subsystems.CatzStateMachineSubsystem;
+import frc.robot.subsystems.CatzStateMachine;
 
 
 public class MechanismMidPosCommand extends CommandBase {
   private CatzElevatorSubsystem ELEVATOR_SUBSYSTEM;
   private CatzIntakeSubsytem INTAKE_SUBSYSTEM;
   private CatzArmSubsystem ARM_SUBSYSTEM;
-  private CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM;
+  private CatzStateMachine STATE_MACHINE_SUBSYSTEM;
 
   /** Creates a new MechanismMidPosCommand. */
-  public MechanismMidPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, CatzArmSubsystem ARM_SUBSYSTEM, CatzIntakeSubsytem INTAKE_SUBSYSTEM, CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM) 
+  public MechanismMidPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, 
+                                CatzArmSubsystem ARM_SUBSYSTEM, 
+                                CatzIntakeSubsytem INTAKE_SUBSYSTEM, 
+                                CatzStateMachine STATE_MACHINE_SUBSYSTEM) 
   {
     this.ELEVATOR_SUBSYSTEM = ELEVATOR_SUBSYSTEM;
     this.INTAKE_SUBSYSTEM = INTAKE_SUBSYSTEM;

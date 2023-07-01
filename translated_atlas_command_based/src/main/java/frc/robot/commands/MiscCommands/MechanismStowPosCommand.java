@@ -16,7 +16,9 @@ public class MechanismStowPosCommand extends CommandBase
   private CatzIntakeSubsytem INTAKE_SUBSYSTEM;
   private CatzArmSubsystem ARM_SUBSYSTEM;
   /** Creates a new MechanismStowPosCommand. */
-  public MechanismStowPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, CatzArmSubsystem ARM_SUBSYSTEM, CatzIntakeSubsytem INTAKE_SUBSYSTEM) 
+  public MechanismStowPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, 
+                                      CatzArmSubsystem ARM_SUBSYSTEM, 
+                                    CatzIntakeSubsytem INTAKE_SUBSYSTEM) 
   {
     this.ELEVATOR_SUBSYSTEM = ELEVATOR_SUBSYSTEM;
     this.INTAKE_SUBSYSTEM = INTAKE_SUBSYSTEM;

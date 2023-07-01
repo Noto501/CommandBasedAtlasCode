@@ -4,12 +4,58 @@
 
 package frc.robot.commands.AutonCmds.AutonMovementCommands;
 
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.Timer;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.CatzDataLogger;
+import frc.robot.subsystems.CatzDriveTrainSubsystem;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
 
 public class BalanceCommand extends CommandBase {
+
+  private final CatzDriveTrainSubsystem DRIVETRAIN_SUBSYSTEM;
+  private final AHRS navX;
+
+  public static Timer timer = new Timer();
+  public static double prevTime = 0.0;
+  public static double time = 0.0;
+
+  public  Boolean startBalance = false;
+
+  public static double prevBalanceAngle = 0.0;
+  public static double balanceAngle = 0.0;
+  public static double angleRate = 0.0;
+  public static double power = 0.0;
+  public static double angleTerm = 0.0;
+  public static double rateTerm = 0.0;
+  public static double powerFinal = 0.0;
+
+
+  public final double ANG_SLOWBAND = 10.0; 
+  public final double ANG_GAIN = 0.008; //0.007
+  public final double RATE_GAIN = 0.002; //0.002
+  public final double MAX_POWER = 0.30;
+  public final double BALANCE_THREAD_PERIOD = 0.02;
+
+
+  //datalogging
+
+  private DoubleLogEntry log_balanceTime;
+  private DoubleLogEntry log_pitch;
   /** Creates a new BalanceCommand. */
-  public BalanceCommand() {
+  public BalanceCommand(CatzDriveTrainSubsystem DRIVETRAIN_SUBSYSTEM, AHRS navX, CatzDataLogger dataLogger) 
+  {
+    this.DRIVETRAIN_SUBSYSTEM = DRIVETRAIN_SUBSYSTEM;
+    this.navX = navX;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(DRIVETRAIN_SUBSYSTEM);
+
+    log_balanceTime = new DoubleLogEntry(dataLogger.log, "Balance Time");
+    log_pitch       = new DoubleLogEntry(dataLogger.log, "balacance angle");
   }
 
   // Called when the command is initially scheduled.
@@ -18,7 +64,61 @@ public class BalanceCommand extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() 
+  {
+    if(startBalance)
+    {
+        time = timer.get();
+
+        balanceAngle = navX.getRoll(); 
+
+        if(prevTime < 0.0)
+        {
+            angleRate = 0.0;
+        } 
+        else 
+        {
+            angleRate = (balanceAngle - prevBalanceAngle)/(time - prevTime);
+        }
+
+        // PID without the I
+        angleTerm = balanceAngle * ANG_GAIN;
+        rateTerm = angleRate * RATE_GAIN;
+
+        power = Clamp(-MAX_POWER, angleTerm + rateTerm, MAX_POWER);
+
+        if(Math.abs(power)< 0.07)
+        {
+            if(power < 0)
+            {
+                power = -0.04;
+            }
+            else if(power > 0)
+            {
+                power = 0.04;
+            }
+            
+            if(Math.abs(balanceAngle) < 2.0)
+            {
+                power = 0.0;
+            }
+        }
+    
+        
+        DRIVETRAIN_SUBSYSTEM.drive(0.0, -power, 0.0); 
+        
+        prevBalanceAngle = balanceAngle;
+        prevTime = time;
+
+        if(CatzDataLogger.chosenDataID.getSelected() == CatzDataLogger.LOG_ID_BALANCE)
+        {
+          log_balanceTime.append(time);
+          log_pitch.append(balanceAngle);
+        }
+    }
+  }
+
+  
 
   // Called once the command ends or is interrupted.
   @Override
@@ -29,4 +129,22 @@ public class BalanceCommand extends CommandBase {
   public boolean isFinished() {
     return false;
   }
+
+
+  public double Clamp(double min, double in, double max)
+  {
+      if(in > max)
+      {
+          return max;
+      }
+      else if(in < min)
+      {
+          return min;
+      }
+      else
+      {
+          return in;
+      }
+  }
+
 }

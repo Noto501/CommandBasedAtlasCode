@@ -4,13 +4,11 @@
 
 package frc.robot.commands.ScoringCommands;
 
-import javax.lang.model.util.ElementScanner14;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.CatzArmSubsystem;
 import frc.robot.subsystems.CatzElevatorSubsystem;
 import frc.robot.subsystems.CatzIntakeSubsytem;
-import frc.robot.subsystems.CatzStateMachineSubsystem;
+import frc.robot.subsystems.CatzStateMachine;
 
 
 public class MechanismLowPosCommand extends CommandBase {
@@ -18,19 +16,22 @@ public class MechanismLowPosCommand extends CommandBase {
   private CatzElevatorSubsystem ELEVATOR_SUBSYSTEM;
   private CatzIntakeSubsytem INTAKE_SUBSYSTEM;
   private CatzArmSubsystem ARM_SUBSYSTEM;
-  private CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM;
+  private CatzStateMachine STATE_MACHINE;
 
 
   private final double ARM_ENCODER_THRESHOLD = 35000.0;
 
   /** Creates a new MechanismLowPosCommand. */
-  public MechanismLowPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, CatzArmSubsystem ARM_SUBSYSTEM, CatzIntakeSubsytem INTAKE_SUBSYSTEM, CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM) 
+  public MechanismLowPosCommand(CatzElevatorSubsystem ELEVATOR_SUBSYSTEM, 
+                                CatzArmSubsystem ARM_SUBSYSTEM, 
+                                CatzIntakeSubsytem INTAKE_SUBSYSTEM, 
+                                CatzStateMachine STATE_MACHINE) 
   {
     //Makes these subsystems declared in this class into slaves to the master subsystems defined in "RobotContainer".
     this.ELEVATOR_SUBSYSTEM = ELEVATOR_SUBSYSTEM;
     this.INTAKE_SUBSYSTEM = INTAKE_SUBSYSTEM;
     this.ARM_SUBSYSTEM = ARM_SUBSYSTEM;
-    this.STATE_MACHINE_SUBSYSTEM = STATE_MACHINE_SUBSYSTEM;
+    this.STATE_MACHINE = STATE_MACHINE;
 
 
     //This command requires elevator, intake, arm subsystems
@@ -47,11 +48,11 @@ public class MechanismLowPosCommand extends CommandBase {
    
     INTAKE_SUBSYSTEM.pidEnable = true;
     
-    if(STATE_MACHINE_SUBSYSTEM.getSelectedGamePiece() == 1)
+    if(STATE_MACHINE.getSelectedGamePiece() == 1)
     {
     INTAKE_SUBSYSTEM.targetPositionDeg = INTAKE_SUBSYSTEM.getIntakeScoreCubePos();
     }
-    else if(STATE_MACHINE_SUBSYSTEM.getSelectedGamePiece() == 2)
+    else if(STATE_MACHINE.getSelectedGamePiece() == 2)
     {
       INTAKE_SUBSYSTEM.targetPositionDeg = INTAKE_SUBSYSTEM.getIntakeScoreConeLowPos();
     }

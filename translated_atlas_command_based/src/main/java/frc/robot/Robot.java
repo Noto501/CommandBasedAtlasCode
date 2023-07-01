@@ -24,7 +24,8 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   @Override
-  public void robotInit() {
+  public void robotInit() 
+  {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
@@ -38,7 +39,8 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {
+  public void robotPeriodic() 
+  {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
@@ -55,13 +57,22 @@ public class Robot extends TimedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {
+  public void autonomousInit() 
+  {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    m_robotContainer.currentTime.reset();
+    m_robotContainer.currentTime.start();
+
+    m_robotContainer.navX.reset();
+
+    m_robotContainer.navX.setAngleAdjustment(-m_robotContainer.navX.getYaw() + 180.0); //set navx's zero position to opposite way robot is facing
+
   }
 
   /** This function is called periodically during autonomous. */
@@ -77,6 +88,16 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+
+//    intake.resetPID();
+ //   intake.enablePID(false);
+    m_robotContainer.currentTime.reset();
+    m_robotContainer.currentTime.start();
+
+
+   // balance.StopBalancing();
+
   }
 
   /** This function is called periodically during operator control. */

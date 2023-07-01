@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.CatzIntakeSubsytem;
-import frc.robot.subsystems.CatzStateMachineSubsystem;
+import frc.robot.subsystems.CatzStateMachine;
 
 
 
@@ -16,17 +16,19 @@ public class IntakeRollersCommand extends CommandBase {
   /** Creates a new IntakeRollersCommand. */
 
   private CatzIntakeSubsytem INTAKE_SUBSYSTEM;
-  private CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM;
+  private CatzStateMachine STATE_MACHINE;
 
   private Supplier<Boolean> rightBumperPressed;
   private Supplier<Boolean> leftBumperPressed;
   
-  public IntakeRollersCommand(CatzIntakeSubsytem INTAKE_SUBSYSTEM, CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM, Supplier<Boolean> rightBumperPressed, 
-                                                                                                                  Supplier<Boolean> leftBumperPressed) 
+  public IntakeRollersCommand(CatzIntakeSubsytem INTAKE_SUBSYSTEM, 
+                                CatzStateMachine STATE_MACHINE, 
+                               Supplier<Boolean> rightBumperPressed, 
+                               Supplier<Boolean> leftBumperPressed) 
   {
     this.rightBumperPressed = rightBumperPressed;
     this.leftBumperPressed = leftBumperPressed;
-    this.STATE_MACHINE_SUBSYSTEM = STATE_MACHINE_SUBSYSTEM;
+    this.STATE_MACHINE = STATE_MACHINE;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -40,7 +42,7 @@ public class IntakeRollersCommand extends CommandBase {
   {
     if(rightBumperPressed.get() == true)
     {
-      if(STATE_MACHINE_SUBSYSTEM.getSelectedGamePiece() == 1)
+      if(STATE_MACHINE.getSelectedGamePiece() == 1)
       {
         INTAKE_SUBSYSTEM.rollersInCube();
       }
@@ -51,7 +53,7 @@ public class IntakeRollersCommand extends CommandBase {
     }
     else if(leftBumperPressed.get() == true)
     {
-      if(STATE_MACHINE_SUBSYSTEM.getSelectedGamePiece() == 1)
+      if(STATE_MACHINE.getSelectedGamePiece() == 1)
       {
         INTAKE_SUBSYSTEM.rollersOutCube();
       }

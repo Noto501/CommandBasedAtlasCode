@@ -5,6 +5,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.function.Supplier;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
@@ -17,6 +20,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
 
 
 public class CatzIntakeSubsytem extends SubsystemBase {
@@ -130,10 +137,22 @@ public class CatzIntakeSubsytem extends SubsystemBase {
     private int numConsectSamples = 0;
 
 
+    //Datalogging
+    private CatzDataLogger dataLogger;
+    private DoubleLogEntry log_targetPwr;
 
+    //button overides
+    private Supplier<Boolean> softLimitOverideBumperEnabledRight;
+    private Supplier<Boolean> softLimitOverideBumperEnabledLeft;
 
-  public CatzIntakeSubsytem() 
+  public CatzIntakeSubsytem(CatzDataLogger dataLogger, Supplier<Boolean> softLimitOverideBumperEnabledRight, Supplier<Boolean> softLimitOverideBumperEnabledLeft) 
   {
+        //datalogging
+        this.dataLogger = dataLogger;
+        this.softLimitOverideBumperEnabledRight = softLimitOverideBumperEnabledRight;
+        this.softLimitOverideBumperEnabledLeft = softLimitOverideBumperEnabledLeft;
+
+        log_targetPwr = new DoubleLogEntry(dataLogger.log, "targetPwr");
         //----------------------------------------------------------------------------------------------
         //  Roller
         //----------------------------------------------------------------------------------------------
@@ -242,9 +261,23 @@ public class CatzIntakeSubsytem extends SubsystemBase {
                     prevCurrentPosition = currentPosition;
                     prevTargetPwr = targetPower;
                    
-                
+                    if((CatzDataLogger.chosenDataID.getSelected() == CatzDataLogger.LOG_ID_INTAKE)) 
+                    {        
+                        log_targetPwr.append(targetPower, (long) RobotContainer.currentTime.get());
+                    }
     }
-                smartdashboardIntakeDebug();
+
+    if(softLimitOverideBumperEnabledRight.get() && softLimitOverideBumperEnabledLeft.get()){
+        wristMtr.configForwardSoftLimitEnable(false);
+        wristMtr.configReverseSoftLimitEnable(false);
+    }
+    else{
+        wristMtr.configForwardSoftLimitEnable(true);
+        wristMtr.configReverseSoftLimitEnable(true);
+    }
+    smartdashboardIntakeDebug();
+
+
   }
 
     /*----------------------------------------------------------------------------------------------

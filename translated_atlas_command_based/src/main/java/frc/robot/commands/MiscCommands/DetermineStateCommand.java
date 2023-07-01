@@ -6,13 +6,13 @@ package frc.robot.commands.MiscCommands;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.CatzStateMachineSubsystem;
+import frc.robot.subsystems.CatzStateMachine;
 
 public class DetermineStateCommand extends CommandBase {
   private int selectedGamePiece;
-  private CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM;
+  private CatzStateMachine STATE_MACHINE_SUBSYSTEM;
   /** Creates a new DetermineStateCommand. */
-  public DetermineStateCommand(int selectedGamePiece, CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM) 
+  public DetermineStateCommand(int selectedGamePiece, CatzStateMachine STATE_MACHINE_SUBSYSTEM) 
   {
     this.selectedGamePiece = selectedGamePiece;
     this.STATE_MACHINE_SUBSYSTEM = STATE_MACHINE_SUBSYSTEM;

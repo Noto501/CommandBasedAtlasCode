@@ -17,7 +17,8 @@ public class ManualArmCommand extends CommandBase
   private final double ARM_PWR_RETRACT = -0.2;
   private final double ARM_PWR_NONE = 0.0;
   /** Creates a new DefaultHoldingArmCommand. */
-  public ManualArmCommand(CatzArmSubsystem ARM_SUBSYSTEM, Supplier<Double> triggerArmHoldPwr) 
+  public ManualArmCommand(CatzArmSubsystem ARM_SUBSYSTEM, 
+                          Supplier<Double> triggerArmHoldPwr) 
   {
     this.ARM_SUBSYSTEM = ARM_SUBSYSTEM;
     this.triggerArmHoldPwr = triggerArmHoldPwr;

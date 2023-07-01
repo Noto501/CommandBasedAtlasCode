@@ -13,6 +13,7 @@ import frc.robot.commands.MiscCommands.DrivetrainWheelLockCommand;
 import frc.robot.commands.MiscCommands.IntakeRollersCommand;
 import frc.robot.commands.MiscCommands.MechanismStowPosCommand;
 import frc.robot.commands.MiscCommands.NavxResetFieldOrientationCommand;
+import frc.robot.commands.AutonCmds.AutonMovementCommands.BalanceCommand;
 import frc.robot.commands.ManualCommands.DefaultDriveCommand;
 import frc.robot.commands.PickupCommands.MechanismDoublePickupCommand;
 import frc.robot.commands.PickupCommands.MechanismGroundPickupCommand;
@@ -24,12 +25,15 @@ import frc.robot.subsystems.CatzArmSubsystem;
 import frc.robot.subsystems.CatzDriveTrainSubsystem;
 import frc.robot.subsystems.CatzElevatorSubsystem;
 import frc.robot.subsystems.CatzIntakeSubsytem;
-import frc.robot.subsystems.CatzStateMachineSubsystem;
+import frc.robot.subsystems.CatzStateMachine;
+import frc.robot.subsystems.CatzDataLogger;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import edu.wpi.first.wpilibj.Timer;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -42,14 +46,15 @@ import com.kauailabs.navx.frc.AHRS;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
-
+  //datalogger
+  public CatzDataLogger dataLogger;
 
   //subsystems
   private final CatzDriveTrainSubsystem DRIVE_SUBSYSTEM;
   private final CatzIntakeSubsytem INTAKE_SUBSYSTEM;
   private final CatzElevatorSubsystem ELEVATOR_SUBSYSTEM;
   private final CatzArmSubsystem ARM_SUBSYSTEM;
-  private final CatzStateMachineSubsystem STATE_MACHINE_SUBSYSTEM;
+  private final CatzStateMachine STATE_MACHINE;
 
   private final CatzConstants catzConstants;
 
@@ -57,6 +62,7 @@ public class RobotContainer {
   private CommandXboxController xboxAux;
 
   public static AHRS              navX;
+  public static Timer             currentTime;
   //xbox commands
 
   //RobotContainer Constants
@@ -69,20 +75,23 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    currentTime = new Timer();
+    dataLogger = new CatzDataLogger();
     catzConstants = new CatzConstants();
-
-    DRIVE_SUBSYSTEM  = new CatzDriveTrainSubsystem();
-    INTAKE_SUBSYSTEM = new CatzIntakeSubsytem();
-    ELEVATOR_SUBSYSTEM = new CatzElevatorSubsystem();
-    ARM_SUBSYSTEM = new CatzArmSubsystem();
-    STATE_MACHINE_SUBSYSTEM = new CatzStateMachineSubsystem();
-
 
     xboxDrv = new CommandXboxController(XBOX_DRV_PORT); 
     xboxAux = new CommandXboxController(XBOX_AUX_PORT);
 
+    DRIVE_SUBSYSTEM  = new CatzDriveTrainSubsystem();
+    INTAKE_SUBSYSTEM = new CatzIntakeSubsytem(dataLogger, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean());
+    ELEVATOR_SUBSYSTEM = new CatzElevatorSubsystem();
+    ARM_SUBSYSTEM = new CatzArmSubsystem();
+    STATE_MACHINE = new CatzStateMachine();
+
+
     navX = new AHRS();
     navX.reset();
+
   
     // Configure the trigger bindings
     configureBindings();
@@ -101,9 +110,9 @@ public class RobotContainer {
   private void configureBindings() 
   {
     //-------------------Scoring Position Bindings------------------------------------
-    xboxAux.y().onTrue(new MechanismHighPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
-    xboxAux.b().onTrue(new MechanismMidPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
-    xboxAux.a().onTrue(new MechanismLowPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
+    xboxAux.y().onTrue(new MechanismHighPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
+    xboxAux.b().onTrue(new MechanismMidPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
+    xboxAux.a().onTrue(new MechanismLowPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
 
     //------------------Stowing Position Bindings-------------------------------------
     xboxAux.x().onTrue(new MechanismStowPosCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM));
@@ -111,15 +120,15 @@ public class RobotContainer {
   
 
     //---------------------Determining Game Piece Bindings------------------------------
-    xboxAux.back().onTrue(new DetermineStateCommand(GP_NONE, STATE_MACHINE_SUBSYSTEM));
-    xboxAux.povLeft().onTrue(new DetermineStateCommand(GP_CUBE, STATE_MACHINE_SUBSYSTEM));
-    xboxAux.povRight().onTrue(new DetermineStateCommand(GP_CONE, STATE_MACHINE_SUBSYSTEM));
+    xboxAux.back().onTrue(new DetermineStateCommand(GP_NONE, STATE_MACHINE));
+    xboxAux.povLeft().onTrue(new DetermineStateCommand(GP_CUBE, STATE_MACHINE));
+    xboxAux.povRight().onTrue(new DetermineStateCommand(GP_CONE, STATE_MACHINE));
     
     //------------------------PickupPositon Bindings--------------------------
-    xboxDrv.rightTrigger().onTrue(new MechanismDoublePickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
-    xboxDrv.leftTrigger().onTrue(new MechanismSinglePickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
-    xboxDrv.leftStick().onTrue(new MechanismGroundPickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
-    xboxAux.start().onTrue(new MechanismGroundPickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM));
+    xboxDrv.rightTrigger().onTrue(new MechanismDoublePickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
+    xboxDrv.leftTrigger().onTrue(new MechanismSinglePickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
+    xboxDrv.leftStick().onTrue(new MechanismGroundPickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
+    xboxAux.start().onTrue(new MechanismGroundPickupCommand(ELEVATOR_SUBSYSTEM, ARM_SUBSYSTEM, INTAKE_SUBSYSTEM, STATE_MACHINE));
 
 
     //-------------------------Manual Arm Bindings--------------------------------------
@@ -128,10 +137,10 @@ public class RobotContainer {
     
 
     //---------------------------Intake Roller Bindings-----------------------------
-    xboxAux.rightBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
-    xboxAux.leftBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
-    xboxDrv.rightBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
-    xboxDrv.leftBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE_SUBSYSTEM, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
+    xboxAux.rightBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
+    xboxAux.leftBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
+    xboxDrv.rightBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
+    xboxDrv.leftBumper().onTrue(new IntakeRollersCommand(INTAKE_SUBSYSTEM, STATE_MACHINE, () -> xboxAux.rightBumper().getAsBoolean(), () -> xboxAux.leftBumper().getAsBoolean()));
 
     //--------------------------Misc Bindings------------------------------------------------
     xboxDrv.start().onTrue(new NavxResetFieldOrientationCommand(navX));
@@ -142,8 +151,10 @@ public class RobotContainer {
 
   private void defaultCommands() 
   {
-    ELEVATOR_SUBSYSTEM.setDefaultCommand(new ManualElevatorCommand(ELEVATOR_SUBSYSTEM, () -> xboxAux.getLeftY(), () -> xboxAux.leftStick().getAsBoolean()));
-    INTAKE_SUBSYSTEM.setDefaultCommand(new ManualIntakeCommand(INTAKE_SUBSYSTEM, () -> xboxAux.getRightY(), () -> xboxAux.rightStick().getAsBoolean()));
+    ELEVATOR_SUBSYSTEM.setDefaultCommand(new ManualElevatorCommand(ELEVATOR_SUBSYSTEM, () -> xboxAux.getLeftY(), 
+                                                                                       () -> xboxAux.leftStick().getAsBoolean()));
+    INTAKE_SUBSYSTEM.setDefaultCommand(new ManualIntakeCommand(INTAKE_SUBSYSTEM, () -> xboxAux.getRightY(), 
+                                                                                 () -> xboxAux.rightStick().getAsBoolean()));
 
     DRIVE_SUBSYSTEM.setDefaultCommand(new DefaultDriveCommand(DRIVE_SUBSYSTEM,
                                                               () -> xboxDrv.getLeftX(),
@@ -159,7 +170,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new SequentialCommandGroup(//TBD will need to get updates on Yuyhun trajectory planner before I proceed with auton
+    return new SequentialCommandGroup
+    (
+      new BalanceCommand(DRIVE_SUBSYSTEM, navX, dataLogger)
       
     );
   }

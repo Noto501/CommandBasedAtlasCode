@@ -14,11 +14,19 @@ package frc.robot;
  */
 public final class CatzConstants {
   public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+
 
 
    
   }
+  
+  //--------------------State machine Constants---------------------------
+  public static final int GP_NONE = 0;
+  public static final int GP_CUBE = 1;
+  public static final int GP_CONE = 2;
+
+  //--------------------
+
 
   public final double POS_ENC_CNTS_HIGH_EXTEND_THRESHOLD_ELEVATOR = 73000.0;
 }
